@@ -1,57 +1,52 @@
-# fly.toml file generated for web-feed on 2023-07-10T18:50:43+03:00
-
-app = "web-feed"
+app = "web-feed-c174"
+primary_region = "otp"
 kill_signal = "SIGINT"
 kill_timeout = 5
-primary_region = "sjc"
-processes = []
-
-[deploy]
-  release_command = "node ./other/sentry-create-release"
-
-[env]
-  DATABASE_URL = "file:/data/sqlite.db"
-  PORT = "8080"
+processes = [ ]
 
 [experimental]
-  cmd = "start_with_migrations.sh"
-  entrypoint = "sh"
+allowed_public_ports = [ ]
+auto_rollback = true
 
-[[mounts]]
-  destination = "/data"
-  source = "data"
+[mounts]
+source = "data"
+destination = "/data"
+
+[deploy]
+release_command = "node ./other/sentry-create-release"
 
 [[services]]
-  internal_port = 8080
-  processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
+internal_port = 8_080
+processes = [ "app" ]
+protocol = "tcp"
+script_checks = [ ]
+
   [services.concurrency]
-    hard_limit = 100
-    soft_limit = 80
-    type = "connections"
-
-  [[services.http_checks]]
-    grace_period = "5s"
-    interval = "10s"
-    method = "get"
-    path = "/resources/healthcheck"
-    protocol = "http"
-    timeout = "2s"
-    tls_skip_verify = false
-    [services.http_checks.headers]
+  hard_limit = 100
+  soft_limit = 80
+  type = "connections"
 
   [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
+  handlers = [ "http" ]
+  port = 80
+  force_https = true
 
   [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
+  handlers = [ "tls", "http" ]
+  port = 443
 
   [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
+  grace_period = "1s"
+  interval = "15s"
+  restart_limit = 0
+  timeout = "2s"
+
+  [[services.http_checks]]
+  interval = "10s"
+  grace_period = "5s"
+  method = "get"
+  path = "/resources/healthcheck"
+  protocol = "http"
+  timeout = "2s"
+  tls_skip_verify = false
+  headers = { }

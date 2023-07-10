@@ -7,8 +7,10 @@ const requiredServerEnvs = [
 	'SESSION_SECRET',
 	'INTERNAL_COMMAND_TOKEN',
 	'CACHE_DATABASE_PATH',
-	'RESEND_API_KEY',
-	'SENTRY_DSN',
+	// If you plan to use Resend, uncomment this line
+	// 'RESEND_API_KEY',
+	// If you plan on using Sentry, uncomment this line
+	// 'SENTRY_DSN',
 ] as const
 
 declare global {
