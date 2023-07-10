@@ -1,6 +1,4 @@
 import fs from 'fs'
-import { faker } from '@faker-js/faker'
-import { createPassword, createUser } from 'tests/db-utils.ts'
 import { prisma } from '~/utils/db.server.ts'
 import { deleteAllData } from 'tests/setup/utils.ts'
 import { getPasswordHash } from '~/utils/auth.server.ts'
@@ -23,52 +21,13 @@ async function seed() {
 		},
 	})
 	console.timeEnd(`👑 Created admin role/permission...`)
-	const totalUsers = 40
-	console.time(`👤 Created ${totalUsers} users...`)
-	const users = await Promise.all(
-		Array.from({ length: totalUsers }, async (_, index) => {
-			const userData = createUser()
-			const user = await prisma.user.create({
-				data: {
-					...userData,
-					password: {
-						create: createPassword(userData.username),
-					},
-					image: {
-						create: {
-							contentType: 'image/jpeg',
-							file: {
-								create: {
-									blob: await fs.promises.readFile(
-										`./tests/fixtures/images/user/${index % 10}.jpg`,
-									),
-								},
-							},
-						},
-					},
-					notes: {
-						create: Array.from({
-							length: faker.number.int({ min: 0, max: 10 }),
-						}).map(() => ({
-							title: faker.lorem.sentence(),
-							content: faker.lorem.paragraphs(),
-						})),
-					},
-				},
-			})
-			return user
-		}),
-	)
-	console.timeEnd(`👤 Created ${totalUsers} users...`)
 
-	console.time(
-		`🐨 Created user "kody" with the password "kodylovesyou" and admin role`,
-	)
+	console.time(`Created user "admin" with the password "admin" and admin role`)
 	await prisma.user.create({
 		data: {
-			email: 'kody@kcd.dev',
-			username: 'kody',
-			name: 'Kody',
+			email: 'admin@web-feed.dev',
+			username: 'admin',
+			name: 'Admin',
 			roles: { connect: { id: adminRole.id } },
 			image: {
 				create: {
@@ -76,7 +35,7 @@ async function seed() {
 					file: {
 						create: {
 							blob: await fs.promises.readFile(
-								'./tests/fixtures/images/user/kody.png',
+								'./tests/fixtures/images/user/0.jpg',
 							),
 						},
 					},
@@ -84,32 +43,13 @@ async function seed() {
 			},
 			password: {
 				create: {
-					hash: await getPasswordHash('kodylovesyou'),
+					hash: await getPasswordHash('admin'),
 				},
-			},
-			notes: {
-				create: [
-					{
-						title: 'Basic Koala Facts',
-						content:
-							'Koalas are found in the eucalyptus forests of eastern Australia. They have grey fur with a cream-coloured chest, and strong, clawed feet, perfect for living in the branches of trees!',
-					},
-					{
-						title: 'Koalas like to cuddle',
-						content:
-							'Cuddly critters, koalas measure about 60cm to 85cm long, and weigh about 14kg.',
-					},
-					{
-						title: 'Not bears',
-						content:
-							"Although you may have heard people call them koala 'bears', these awesome animals aren’t bears at all – they are in fact marsupials. A group of mammals, most marsupials have pouches where their newborns develop.",
-					},
-				],
 			},
 		},
 	})
 	console.timeEnd(
-		`🐨 Created user "kody" with the password "kodylovesyou" and admin role`,
+		`Created user "admin" with the password "admin" and admin role`,
 	)
 
 	console.timeEnd(`🌱 Database has been seeded`)
