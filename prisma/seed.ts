@@ -38,7 +38,7 @@ async function seed() {
 		},
 	})
 	console.timeEnd(
-		`Created user "admin" with the password "password" and admin role`,
+		`🐨 Created user "admin" with the password "password" and admin role`,
 	)
 
 	console.timeEnd(`🌱 Database has been seeded`)

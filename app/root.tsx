@@ -40,7 +40,7 @@ import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
 import { prisma } from './utils/db.server.ts'
 import { getEnv } from './utils/env.server.ts'
 import { getFlashSession } from './utils/flash-session.server.ts'
-import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.ts'
+import { combineHeaders, getDomainUrl } from './utils/misc.ts'
 import { useNonce } from './utils/nonce-provider.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { useToast } from './utils/useToast.tsx'
@@ -218,11 +218,6 @@ function UserDropdown() {
 						onClick={e => e.preventDefault()}
 						className="flex items-center gap-2"
 					>
-						<img
-							className="h-4 w-4 rounded-full object-cover"
-							alt={user.name ?? user.username}
-							src={getUserImgSrc(user.imageId)}
-						/>
 						<span className="text-body-sm font-bold">
 							{user.name ?? user.username}
 						</span>
