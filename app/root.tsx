@@ -20,7 +20,6 @@ import {
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
 import { useRef } from 'react'
-import { Confetti } from './components/confetti.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { Button } from './components/ui/button.tsx'
 import {
@@ -76,8 +75,8 @@ export const links: LinksFunction = () => {
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
-		{ name: 'description', content: `Your own captain's log` },
+		{ title: data ? 'Web Feed' : 'Error | Web Feed' },
+		{ name: 'description', content: `RSS feeds for web developers.` },
 	]
 }
 
@@ -186,17 +185,11 @@ function App() {
 				<header className="container py-6">
 					<nav className="flex justify-between">
 						<Link to="/">
-							<div className="font-light">epic</div>
-							<div className="font-bold">notes</div>
+							<div className="font-bold">Web Feed</div>
 						</Link>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="sm">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
+						<div className="flex items-center gap-4">
+							{user ? <UserDropdown /> : null}
+							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 						</div>
 					</nav>
 				</header>
@@ -204,16 +197,7 @@ function App() {
 				<div className="flex-1">
 					<Outlet />
 				</div>
-
-				<div className="container flex justify-between pb-5">
-					<Link to="/">
-						<div className="font-light">epic</div>
-						<div className="font-bold">notes</div>
-					</Link>
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
 			</div>
-			<Confetti confetti={data.flash?.confetti} />
 			<Toaster />
 		</Document>
 	)
@@ -235,7 +219,7 @@ function UserDropdown() {
 						className="flex items-center gap-2"
 					>
 						<img
-							className="h-8 w-8 rounded-full object-cover"
+							className="h-4 w-4 rounded-full object-cover"
 							alt={user.name ?? user.username}
 							src={getUserImgSrc(user.imageId)}
 						/>
@@ -247,20 +231,6 @@ function UserDropdown() {
 			</DropdownMenuTrigger>
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="start">
-					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}`}>
-							<Icon className="text-body-md" name="avatar">
-								Profile
-							</Icon>
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}/notes`}>
-							<Icon className="text-body-md" name="pencil-2">
-								Notes
-							</Icon>
-						</Link>
-					</DropdownMenuItem>
 					<DropdownMenuItem
 						asChild
 						// this prevents the menu from closing before the form submission is completed

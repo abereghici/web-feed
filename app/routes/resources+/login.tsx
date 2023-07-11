@@ -1,7 +1,7 @@
 import { conform, useForm } from '@conform-to/react'
 import { getFieldsetConstraint, parse } from '@conform-to/zod'
 import { json, redirect, type DataFunctionArgs } from '@remix-run/node'
-import { Link, useFetcher } from '@remix-run/react'
+import { useFetcher } from '@remix-run/react'
 import { AuthorizationError } from 'remix-auth'
 import { FormStrategy } from 'remix-auth-form'
 import { safeRedirect } from 'remix-utils'
@@ -14,8 +14,6 @@ import { invariantResponse } from '~/utils/misc.ts'
 import { commitSession, getSession } from '~/utils/session.server.ts'
 import { passwordSchema, usernameSchema } from '~/utils/user-validation.ts'
 import { checkboxSchema } from '~/utils/zod-extensions.ts'
-import { twoFAVerificationType } from '../settings+/profile.two-factor.tsx'
-import { unverifiedSessionKey } from './verify.tsx'
 
 const ROUTE_PATH = '/resources/login'
 
@@ -76,14 +74,8 @@ export async function action({ request }: DataFunctionArgs) {
 	})
 	invariantResponse(session, 'newly created session not found')
 
-	const user2FA = await prisma.verification.findFirst({
-		where: { type: twoFAVerificationType, target: session.userId },
-		select: { id: true },
-	})
-
 	const cookieSession = await getSession(request.headers.get('cookie'))
-	const keyToSet = user2FA ? unverifiedSessionKey : authenticator.sessionKey
-	cookieSession.set(keyToSet, sessionId)
+	cookieSession.set(authenticator.sessionKey, sessionId)
 	const { remember, redirectTo } = submission.value
 	const responseInit = {
 		headers: {
@@ -92,7 +84,7 @@ export async function action({ request }: DataFunctionArgs) {
 			}),
 		},
 	}
-	if (user2FA || !redirectTo) {
+	if (!redirectTo) {
 		return json({ status: 'success', submission } as const, responseInit)
 	} else {
 		throw redirect(safeRedirect(redirectTo), responseInit)
@@ -153,15 +145,6 @@ export function InlineLogin({
 							buttonProps={conform.input(fields.remember, { type: 'checkbox' })}
 							errors={fields.remember.errors}
 						/>
-
-						<div>
-							<Link
-								to="/forgot-password"
-								className="text-body-xs font-semibold"
-							>
-								Forgot password?
-							</Link>
-						</div>
 					</div>
 
 					<input {...conform.input(fields.redirectTo)} type="hidden" />
@@ -182,10 +165,6 @@ export function InlineLogin({
 						</StatusButton>
 					</div>
 				</loginFetcher.Form>
-				<div className="flex items-center justify-center gap-2 pt-6">
-					<span className="text-muted-foreground">New here?</span>
-					<Link to="/signup">Create an account</Link>
-				</div>
 			</div>
 		</div>
 	)

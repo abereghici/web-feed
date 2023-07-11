@@ -9,7 +9,6 @@ import { Spacer } from '~/components/spacer.tsx'
 import { authenticator, requireAnonymous } from '~/utils/auth.server.ts'
 import { commitSession, getSession } from '~/utils/session.server.ts'
 import { InlineLogin } from '../resources+/login.tsx'
-import { Verifier, unverifiedSessionKey } from '../resources+/verify.tsx'
 
 export async function loader({ request }: DataFunctionArgs) {
 	await requireAnonymous(request)
@@ -20,7 +19,7 @@ export async function loader({ request }: DataFunctionArgs) {
 		errorMessage = error.message
 	}
 	return json(
-		{ formError: errorMessage, unverified: session.has(unverifiedSessionKey) },
+		{ formError: errorMessage },
 		{
 			headers: {
 				'Set-Cookie': await commitSession(session),
@@ -30,7 +29,7 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export const meta: V2_MetaFunction = () => {
-	return [{ title: 'Login to Epic Notes' }]
+	return [{ title: 'Login to Web Feed' }]
 }
 
 export default function LoginPage() {
@@ -44,16 +43,9 @@ export default function LoginPage() {
 			<div className="mx-auto w-full max-w-md">
 				<div className="flex flex-col gap-3 text-center">
 					<h1 className="text-h1">Welcome back!</h1>
-					<p className="text-body-md text-muted-foreground">
-						Please enter your details.
-					</p>
 				</div>
 				<Spacer size="xs" />
-				{data.unverified ? (
-					<Verifier redirectTo={redirectTo} />
-				) : (
-					<InlineLogin redirectTo={redirectTo} formError={data.formError} />
-				)}
+				<InlineLogin redirectTo={redirectTo} formError={data.formError} />
 			</div>
 		</div>
 	)
