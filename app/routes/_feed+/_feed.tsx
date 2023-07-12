@@ -1,5 +1,5 @@
 import { type DataFunctionArgs, json } from '@remix-run/node'
-import { Outlet, useLoaderData } from '@remix-run/react'
+import { Outlet } from '@remix-run/react'
 import { MainLayout } from '~/components/layout/main-layout.tsx'
 import {
 	Sidebar,
@@ -8,13 +8,10 @@ import {
 } from '~/components/layout/sidebar.tsx'
 
 export async function loader({ request }: DataFunctionArgs) {
-	return json({
-		test: 'test',
-	})
+	return json({})
 }
 
 export default function Feed() {
-	const data = useLoaderData<typeof loader>()
 	return (
 		<MainLayout
 			content={<Outlet />}

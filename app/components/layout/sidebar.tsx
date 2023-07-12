@@ -2,6 +2,7 @@ import { cn } from '~/utils/misc.ts'
 import { Button } from '../ui/button.tsx'
 import { ScrollArea } from '../ui/scroll-area.tsx'
 import { Link } from '@remix-run/react'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.tsx'
 
 type SidebarItem = {
 	thumbnail: string
@@ -11,6 +12,15 @@ type SidebarItem = {
 }
 
 export function SidebarItem({ title, thumbnail, href, onClick }: SidebarItem) {
+	const content = (
+		<>
+			<Avatar className=" mr-2 h-6 w-6">
+				<AvatarImage src={thumbnail} />
+				<AvatarFallback>{title.slice(0, 1)}</AvatarFallback>
+			</Avatar>
+			{title}
+		</>
+	)
 	return (
 		<Button
 			asChild={!!href}
@@ -18,8 +28,7 @@ export function SidebarItem({ title, thumbnail, href, onClick }: SidebarItem) {
 			className="w-full justify-start"
 			onClick={onClick}
 		>
-			<img src={thumbnail} className="mr-2 w-4 rounded" alt="" />
-			{href ? <Link to={href}>{title}</Link> : title}
+			{href ? <Link to={href}>{content}</Link> : content}
 		</Button>
 	)
 }
