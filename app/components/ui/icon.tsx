@@ -66,6 +66,7 @@ type IconName =
   | "arrow-left"
   | "arrow-right"
   | "avatar"
+  | "calendar"
   | "camera"
   | "check"
   | "clock"

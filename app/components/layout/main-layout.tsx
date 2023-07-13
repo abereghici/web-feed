@@ -41,7 +41,7 @@ export function MainLayout({ content, aside }: Props) {
 
 	return (
 		<>
-			<Header className="">
+			<Header className="sticky top-0 z-10 bg-background">
 				<Nav
 					leftSlot={mobileSidebarSheet}
 					rightSlot={
