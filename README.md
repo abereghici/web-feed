@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center"><a href="https://www.web-feed.dev"><img src="https://web-feed.dev/img/og.jpeg" alt="Web Feed" /></a></h1>
+  <h1 align="center"><a href="https://www.web-feed.dev"><img src="https://web-feed.dev/img/og.jpeg?1" alt="Web Feed" /></a></h1>
   <strong align="center">
     RSS feeds for web developers.
   </strong>
