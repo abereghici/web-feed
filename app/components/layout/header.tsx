@@ -6,9 +6,5 @@ type Props = PropsWithChildren & {
 }
 
 export function Header({ children, className }: Props) {
-	return (
-		<header className={cn('container border-b py-2', className)}>
-			{children}
-		</header>
-	)
+	return <header className={cn('border-b py-2', className)}>{children}</header>
 }

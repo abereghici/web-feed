@@ -33,6 +33,8 @@ import { combineHeaders, getDomainUrl } from '~/utils/misc.ts'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import { makeTimings, time } from '~/utils/timing.server.ts'
 import { useToast } from '~/utils/useToast.tsx'
+import nProgressStyles from 'nprogress/nprogress.css'
+import { GlobalLoading } from './components/global-loading.tsx'
 
 export const links: LinksFunction = () => {
 	return [
@@ -55,6 +57,7 @@ export const links: LinksFunction = () => {
 			crossOrigin: 'use-credentials',
 		} as const, // necessary to make typescript happy
 		{ rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
+		{ rel: 'stylesheet', href: nProgressStyles },
 		{ rel: 'stylesheet', href: fontStylestylesheetUrl },
 		{ rel: 'stylesheet', href: tailwindStylesheetUrl },
 		cssBundleHref ? { rel: 'stylesheet', href: cssBundleHref } : null,
@@ -64,7 +67,10 @@ export const links: LinksFunction = () => {
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
 	return [
 		{ title: data ? 'Web Feed' : 'Error | Web Feed' },
-		{ name: 'description', content: `RSS feeds for web developers.` },
+		{
+			name: 'description',
+			content: 'A useful database with links and resources for web developers',
+		},
 	]
 }
 
@@ -170,6 +176,7 @@ function App() {
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
 			<Outlet />
 			<Toaster />
+			<GlobalLoading />
 		</Document>
 	)
 }

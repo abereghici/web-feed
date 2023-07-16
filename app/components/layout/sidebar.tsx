@@ -1,34 +1,62 @@
 import { cn } from '~/utils/misc.ts'
 import { Button } from '../ui/button.tsx'
 import { ScrollArea } from '../ui/scroll-area.tsx'
-import { Link } from '@remix-run/react'
+import { NavLink, useMatches } from '@remix-run/react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.tsx'
 
 type SidebarItem = {
-	thumbnail: string
+	thumbnail?: string
 	title: string
 	href?: string
+	isFirstItem?: boolean
 	onClick?: () => void
 }
 
-export function SidebarItem({ title, thumbnail, href, onClick }: SidebarItem) {
+export function SidebarItem({
+	title,
+	thumbnail,
+	href,
+	isFirstItem,
+	onClick,
+}: SidebarItem) {
+	const matches = useMatches()
+	const { pathname } = matches[matches.length - 1]
+
 	const content = (
 		<>
-			<Avatar className=" mr-2 h-6 w-6">
-				<AvatarImage src={thumbnail} />
-				<AvatarFallback>{title.slice(0, 1)}</AvatarFallback>
-			</Avatar>
+			{thumbnail ? (
+				<Avatar className=" mr-2 h-6 w-6">
+					<AvatarImage src={thumbnail} />
+					<AvatarFallback>{title.slice(0, 1)}</AvatarFallback>
+				</Avatar>
+			) : null}
 			{title}
 		</>
 	)
+
+	if (href) {
+		return (
+			<NavLink to={href}>
+				{state => (
+					<Button
+						variant={
+							state.isActive || (pathname === '/' && isFirstItem)
+								? 'secondary'
+								: 'ghost'
+						}
+						asChild
+						className="w-full justify-start"
+						onClick={onClick}
+					>
+						<span>{content}</span>
+					</Button>
+				)}
+			</NavLink>
+		)
+	}
 	return (
-		<Button
-			asChild={!!href}
-			variant="ghost"
-			className="w-full justify-start"
-			onClick={onClick}
-		>
-			{href ? <Link to={href}>{content}</Link> : content}
+		<Button variant="ghost" className="w-full justify-start" onClick={onClick}>
+			{content}
 		</Button>
 	)
 }
@@ -57,7 +85,7 @@ type SidebarProps = {
 export function Sidebar({ className, children }: SidebarProps) {
 	return (
 		<ScrollArea className={cn('h-full max-h-[100vh]', className)}>
-			<div className="space-y-4 py-4">{children}</div>
+			{children}
 		</ScrollArea>
 	)
 }

@@ -2,9 +2,23 @@ import { useOutlet } from '@remix-run/react'
 import { type ClassValue, clsx } from 'clsx'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { fileTypeFromBuffer } from 'file-type'
 
-export function getUserImgSrc(imageId?: string | null) {
-	return imageId ? `/resources/file/${imageId}` : `/img/user.png`
+export function getImgSrc(imageId?: string | null) {
+	return imageId ? `/resources/file/${imageId}` : undefined
+}
+
+export async function getFavicon(url: string) {
+	let img = await fetch(
+		`https://www.google.com/s2/favicons?domain=${url}&sz=256`,
+	)
+	const buffer = Buffer.from(await img.arrayBuffer())
+	const contentType = await fileTypeFromBuffer(buffer)
+
+	return {
+		buffer,
+		contentType: contentType?.mime ?? 'image/png',
+	}
 }
 
 export function getErrorMessage(error: unknown) {
@@ -119,3 +133,25 @@ export function AnimatedOutlet() {
 
 	return outlet
 }
+
+/**
+ * Convert a string to a slug
+ * @param text The text to slugify
+ * @returns The slugified text
+ */
+export function slugify(text: string) {
+	return text
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/[\s_-]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+}
+
+export const isFulfilled = <T>(
+	p: PromiseSettledResult<T>,
+): p is PromiseFulfilledResult<T> => p.status === 'fulfilled'
+
+export const isRejected = <T>(
+	p: PromiseSettledResult<T>,
+): p is PromiseRejectedResult => p.status === 'rejected'
