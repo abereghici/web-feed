@@ -26,7 +26,8 @@ model Image {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User?
+  user   User?
+  Source Source?
 }
 
 model Role {
@@ -80,4 +81,31 @@ model Session {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   expirationDate DateTime
+}
+
+model SourceCategory {
+  id   String @id @unique @default(cuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sources Source[]
+}
+
+model Source {
+  id String @id @unique @default(cuid())
+
+  url  String @unique
+  slug String @unique
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category         SourceCategory? @relation(fields: [sourceCategoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sourceCategoryId String?
+
+  image   Image?  @relation(fields: [imageId], references: [fileId], onDelete: Cascade, onUpdate: Cascade)
+  imageId String? @unique
 }

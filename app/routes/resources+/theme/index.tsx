@@ -10,6 +10,7 @@ import { Icon } from '~/components/ui/icon.tsx'
 import { useHints } from '~/utils/client-hints.tsx'
 import { useRequestInfo } from '~/utils/request-info.ts'
 import { setTheme } from './theme.server.ts'
+import { Button } from '~/components/ui/button.tsx'
 
 const ROUTE_PATH = '/resources/theme'
 
@@ -17,6 +18,11 @@ const ThemeFormSchema = z.object({
 	redirectTo: z.string().optional(),
 	theme: z.enum(['system', 'light', 'dark']),
 })
+
+export type UserPreferenceTheme = Exclude<
+	z.infer<typeof ThemeFormSchema>['theme'],
+	'system'
+>
 
 export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
@@ -51,7 +57,7 @@ export async function action({ request }: DataFunctionArgs) {
 export function ThemeSwitch({
 	userPreference,
 }: {
-	userPreference?: 'light' | 'dark'
+	userPreference?: UserPreferenceTheme
 }) {
 	const requestInfo = useRequestInfo()
 	const fetcher = useFetcher()
@@ -85,7 +91,7 @@ export function ThemeSwitch({
 			</Icon>
 		),
 		system: (
-			<Icon name="laptop">
+			<Icon name="desktop">
 				<span className="sr-only">System</span>
 			</Icon>
 		),
@@ -102,9 +108,7 @@ export function ThemeSwitch({
 					<input type="hidden" name="redirectTo" value={requestInfo.path} />
 				)}
 				<input type="hidden" name="theme" value={nextMode} />
-				<button className="flex h-8 w-8 cursor-pointer items-center justify-center">
-					{modeLabel[mode]}
-				</button>
+				<Button variant="ghost">{modeLabel[mode]}</Button>
 			</div>
 			<ErrorList errors={form.errors} id={form.errorId} />
 		</fetcher.Form>

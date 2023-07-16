@@ -101,7 +101,7 @@ app.use(
 				].filter(Boolean),
 				'font-src': ["'self'"],
 				'frame-src': ["'self'"],
-				'img-src': ["'self'", 'data:'],
+				'img-src': ["'self'", 'data:', '*'],
 				'script-src': [
 					"'strict-dynamic'",
 					"'self'",

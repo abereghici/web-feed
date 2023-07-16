@@ -7,8 +7,6 @@ import {
 	type V2_MetaFunction,
 } from '@remix-run/node'
 import {
-	Form,
-	Link,
 	Links,
 	LiveReload,
 	Meta,
@@ -16,35 +14,28 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
-import { useRef } from 'react'
-import { GeneralErrorBoundary } from './components/error-boundary.tsx'
-import { Button } from './components/ui/button.tsx'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuPortal,
-	DropdownMenuTrigger,
-} from './components/ui/dropdown-menu.tsx'
-import { Icon, href as iconsHref } from './components/ui/icon.tsx'
-import { Toaster } from './components/ui/toaster.tsx'
-import { ThemeSwitch, useTheme } from './routes/resources+/theme/index.tsx'
-import { getTheme } from './routes/resources+/theme/theme.server.ts'
-import fontStylestylesheetUrl from './styles/font.css'
-import tailwindStylesheetUrl from './styles/tailwind.css'
-import { authenticator, getUserId } from './utils/auth.server.ts'
-import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
-import { prisma } from './utils/db.server.ts'
-import { getEnv } from './utils/env.server.ts'
-import { getFlashSession } from './utils/flash-session.server.ts'
-import { combineHeaders, getDomainUrl } from './utils/misc.ts'
-import { useNonce } from './utils/nonce-provider.ts'
-import { makeTimings, time } from './utils/timing.server.ts'
-import { useToast } from './utils/useToast.tsx'
-import { useOptionalUser, useUser } from './utils/user.ts'
+import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
+
+import { href as iconsHref } from '~/components/ui/icon.tsx'
+import { Toaster } from '~/components/ui/toaster.tsx'
+import { useTheme } from '~/routes/resources+/theme/index.tsx'
+import { getTheme } from '~/routes/resources+/theme/theme.server.ts'
+import fontStylestylesheetUrl from '~/styles/font.css'
+import tailwindStylesheetUrl from '~/styles/tailwind.css'
+import { authenticator, getUserId } from '~/utils/auth.server.ts'
+import { ClientHintCheck, getHints } from '~/utils/client-hints.tsx'
+import { prisma } from '~/utils/db.server.ts'
+import { getEnv } from '~/utils/env.server.ts'
+import { getFlashSession } from '~/utils/flash-session.server.ts'
+import { combineHeaders, getDomainUrl, getUrl } from '~/utils/misc.ts'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import { makeTimings, time } from '~/utils/timing.server.ts'
+import { useToast } from '~/utils/useToast.tsx'
+import nProgressStyles from 'nprogress/nprogress.css'
+import { GlobalLoading } from './components/global-loading.tsx'
+import { getSocialMetas } from './utils/seo.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -67,6 +58,7 @@ export const links: LinksFunction = () => {
 			crossOrigin: 'use-credentials',
 		} as const, // necessary to make typescript happy
 		{ rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
+		{ rel: 'stylesheet', href: nProgressStyles },
 		{ rel: 'stylesheet', href: fontStylestylesheetUrl },
 		{ rel: 'stylesheet', href: tailwindStylesheetUrl },
 		cssBundleHref ? { rel: 'stylesheet', href: cssBundleHref } : null,
@@ -74,9 +66,16 @@ export const links: LinksFunction = () => {
 }
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
+	const requestInfo = data?.requestInfo
 	return [
 		{ title: data ? 'Web Feed' : 'Error | Web Feed' },
-		{ name: 'description', content: `RSS feeds for web developers.` },
+		{
+			...getSocialMetas({
+				url: getUrl(requestInfo),
+				keywords:
+					'javascript,typescript,css,html,web,frontend,developer,react,vue,angular,node,deno,webdev,webdevelopment',
+			}),
+		},
 	]
 }
 
@@ -175,76 +174,18 @@ function Document({
 function App() {
 	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
-	const user = useOptionalUser()
 	const theme = useTheme()
 	useToast(data.flash?.toast)
 
 	return (
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
-			<div className="flex h-screen flex-col justify-between">
-				<header className="container py-6">
-					<nav className="flex justify-between">
-						<Link to="/">
-							<div className="font-bold">Web Feed</div>
-						</Link>
-						<div className="flex items-center gap-4">
-							{user ? <UserDropdown /> : null}
-							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-						</div>
-					</nav>
-				</header>
-
-				<div className="flex-1">
-					<Outlet />
-				</div>
-			</div>
+			<Outlet />
 			<Toaster />
+			<GlobalLoading />
 		</Document>
 	)
 }
 export default withSentry(App)
-
-function UserDropdown() {
-	const user = useUser()
-	const submit = useSubmit()
-	const formRef = useRef<HTMLFormElement>(null)
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<Button asChild variant="secondary">
-					<Link
-						to={`/users/${user.username}`}
-						// this is for progressive enhancement
-						onClick={e => e.preventDefault()}
-						className="flex items-center gap-2"
-					>
-						<span className="text-body-sm font-bold">
-							{user.name ?? user.username}
-						</span>
-					</Link>
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuPortal>
-				<DropdownMenuContent sideOffset={8} align="start">
-					<DropdownMenuItem
-						asChild
-						// this prevents the menu from closing before the form submission is completed
-						onSelect={event => {
-							event.preventDefault()
-							submit(formRef.current)
-						}}
-					>
-						<Form action="/logout" method="POST" ref={formRef}>
-							<Icon className="text-body-md" name="exit">
-								<button type="submit">Logout</button>
-							</Icon>
-						</Form>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenuPortal>
-		</DropdownMenu>
-	)
-}
 
 export function ErrorBoundary() {
 	// the nonce doesn't rely on the loader so we can access that

@@ -87,3 +87,11 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+#nprogress .bar {
+	@apply h-1 bg-primary;
+}
+
+#nprogress .peg {
+	@apply bg-primary shadow-sm;
+}

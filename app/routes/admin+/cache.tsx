@@ -14,6 +14,13 @@ import { Field } from '~/components/forms.tsx'
 import { Spacer } from '~/components/spacer.tsx'
 import { Button } from '~/components/ui/button.tsx'
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select.tsx'
+import {
 	cache,
 	getAllCacheKeys,
 	lruCache,
@@ -89,56 +96,34 @@ export default function CacheAdminRoute() {
 	}, 400)
 
 	return (
-		<div className="container">
-			<h1 className="text-h1">Cache Admin</h1>
-			<Spacer size="2xs" />
+		<div className="container my-4">
 			<Form
 				method="get"
-				className="flex flex-col gap-4"
+				className="flex flex-col"
 				onChange={e => handleFormChange(e.currentTarget)}
 			>
-				<div className="flex-1">
-					<div className="flex flex-1 gap-4">
-						<button
-							type="submit"
-							className="flex h-16 items-center justify-center"
-						>
-							🔎
-						</button>
-						<Field
-							className="flex-1"
-							labelProps={{ children: 'Search' }}
-							inputProps={{
-								type: 'search',
-								name: 'query',
-								defaultValue: query,
-							}}
-						/>
-						<div className="flex h-16 w-14 items-center text-lg font-medium text-muted-foreground">
-							<span title="Total results shown">
-								{data.cacheKeys.sqlite.length + data.cacheKeys.lru.length}
-							</span>
-						</div>
-					</div>
-				</div>
-				<div className="flex flex-wrap items-center gap-4">
-					<Field
-						labelProps={{
-							children: 'Limit',
-						}}
-						inputProps={{
-							name: 'limit',
-							defaultValue: limit,
-							type: 'number',
-							step: '1',
-							min: '1',
-							max: '10000',
-							placeholder: 'results limit',
-						}}
-					/>
-					<select name="instance" defaultValue={instance}>
+				<Field
+					labelProps={{
+						children: 'Limit',
+					}}
+					inputProps={{
+						name: 'limit',
+						defaultValue: limit,
+						type: 'number',
+						step: '1',
+						min: '1',
+						max: '10000',
+						placeholder: 'results limit',
+					}}
+				/>
+
+				<Select name="instance" defaultValue={instance}>
+					<SelectTrigger>
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
 						{Object.entries(data.instances).map(([inst, region]) => (
-							<option key={inst} value={inst}>
+							<SelectItem key={inst} value={inst}>
 								{[
 									inst,
 									`(${region})`,
@@ -151,14 +136,31 @@ export default function CacheAdminRoute() {
 								]
 									.filter(Boolean)
 									.join(' ')}
-							</option>
+							</SelectItem>
 						))}
-					</select>
+					</SelectContent>
+				</Select>
+
+				<Spacer size="2xs" />
+
+				<div className="flex flex-1 items-center justify-center gap-4">
+					<Field
+						className="flex-1"
+						labelProps={{ children: 'Search' }}
+						inputProps={{
+							type: 'search',
+							name: 'query',
+							defaultValue: query,
+						}}
+					/>
+					<Button type="submit" className="mt-[-10px]">
+						Search
+					</Button>
 				</div>
 			</Form>
-			<Spacer size="2xs" />
+
 			<div className="flex flex-col gap-4">
-				<h2 className="text-h2">LRU Cache:</h2>
+				<h2 className="text-h5">LRU Cache:</h2>
 				{data.cacheKeys.lru.map(key => (
 					<CacheKeyRow
 						key={key}
@@ -168,9 +170,9 @@ export default function CacheAdminRoute() {
 					/>
 				))}
 			</div>
-			<Spacer size="3xs" />
+			<Spacer size="4xs" />
 			<div className="flex flex-col gap-4">
-				<h2 className="text-h2">SQLite Cache:</h2>
+				<h2 className="text-h5">SQLite Cache:</h2>
 				{data.cacheKeys.sqlite.map(key => (
 					<CacheKeyRow
 						key={key}
