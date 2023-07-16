@@ -155,3 +155,17 @@ export const isFulfilled = <T>(
 export const isRejected = <T>(
 	p: PromiseSettledResult<T>,
 ): p is PromiseRejectedResult => p.status === 'rejected'
+
+function removeTrailingSlash(s: string) {
+	return s.endsWith('/') ? s.slice(0, -1) : s
+}
+
+function getOrigin(requestInfo?: { origin?: string; path: string }) {
+	return requestInfo?.origin ?? 'https://web-feed.dev'
+}
+
+export function getUrl(requestInfo?: { origin: string; path: string }) {
+	return removeTrailingSlash(
+		`${getOrigin(requestInfo)}${requestInfo?.path ?? ''}`,
+	)
+}

@@ -29,12 +29,13 @@ import { ClientHintCheck, getHints } from '~/utils/client-hints.tsx'
 import { prisma } from '~/utils/db.server.ts'
 import { getEnv } from '~/utils/env.server.ts'
 import { getFlashSession } from '~/utils/flash-session.server.ts'
-import { combineHeaders, getDomainUrl } from '~/utils/misc.ts'
+import { combineHeaders, getDomainUrl, getUrl } from '~/utils/misc.ts'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import { makeTimings, time } from '~/utils/timing.server.ts'
 import { useToast } from '~/utils/useToast.tsx'
 import nProgressStyles from 'nprogress/nprogress.css'
 import { GlobalLoading } from './components/global-loading.tsx'
+import { getSocialMetas } from './utils/seo.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -65,11 +66,15 @@ export const links: LinksFunction = () => {
 }
 
 export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
+	const requestInfo = data?.requestInfo
 	return [
 		{ title: data ? 'Web Feed' : 'Error | Web Feed' },
 		{
-			name: 'description',
-			content: 'A useful database with links and resources for web developers',
+			...getSocialMetas({
+				url: getUrl(requestInfo),
+				keywords:
+					'javascript,typescript,css,html,web,frontend,developer,react,vue,angular,node,deno,webdev,webdevelopment',
+			}),
 		},
 	]
 }
