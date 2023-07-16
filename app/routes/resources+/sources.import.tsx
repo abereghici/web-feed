@@ -79,11 +79,12 @@ export async function action({ request }: DataFunctionArgs) {
 				select: { id: true },
 			})
 
+			const { buffer, contentType } = await getFavicon(item.link)
 			const image = {
-				contentType: 'image/png',
+				contentType,
 				file: {
 					create: {
-						blob: Buffer.from(await getFavicon(item.link)),
+						blob: buffer,
 					},
 				},
 			}
