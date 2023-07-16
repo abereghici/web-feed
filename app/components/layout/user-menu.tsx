@@ -1,4 +1,4 @@
-import { Form, useSubmit } from '@remix-run/react'
+import { Form, Link, useSubmit } from '@remix-run/react'
 import { useRef } from 'react'
 import { useUser } from '~/utils/user.ts'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar.tsx'
@@ -51,11 +51,31 @@ export function UserMenu() {
 							submit(formRef.current)
 						}}
 					>
+						<Link to="/admin">
+							<Button variant="ghost" className="justify-start">
+								<Icon className="mr-2" name="rocket" />
+								Manage
+							</Button>
+						</Link>
+					</DropdownMenuItem>
+
+					<DropdownMenuItem
+						asChild
+						// this prevents the menu from closing before the form submission is completed
+						onSelect={event => {
+							event.preventDefault()
+							submit(formRef.current)
+						}}
+					>
 						<Form action="/logout" method="POST" ref={formRef}>
-							<button className="block w-full text-start" type="submit">
-								<Icon className="mr-2 text-body-md" name="exit" />
-								Logout
-							</button>
+							<Button
+								variant="ghost"
+								className="w-full justify-start"
+								type="submit"
+							>
+								<Icon className="mr-2" name="exit" />
+								<span>Logout</span>
+							</Button>
 						</Form>
 					</DropdownMenuItem>
 				</DropdownMenuContent>

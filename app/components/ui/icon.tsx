@@ -85,5 +85,6 @@ type IconName =
   | "pencil-2"
   | "plus"
   | "reset"
+  | "rocket"
   | "sun"
   | "trash"

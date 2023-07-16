@@ -41,6 +41,27 @@ async function seed() {
 		`🐨 Created user "admin" with the password "password" and admin role`,
 	)
 
+	console.time(`Creating categories...`)
+	const category = await prisma.sourceCategory.create({
+		data: { name: 'News' },
+	})
+	console.timeEnd(`Creating categories...`)
+
+	console.time(`Creating sources...`)
+	await prisma.source.create({
+		data: {
+			name: 'The New York Times',
+			slug: 'the-new-york-times',
+			url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+			category: {
+				connect: {
+					id: category.id,
+				},
+			},
+		},
+	})
+	console.timeEnd(`Creating sources...`)
+
 	console.timeEnd(`🌱 Database has been seeded`)
 }
 
