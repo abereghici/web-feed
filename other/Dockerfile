@@ -14,7 +14,8 @@ FROM base as deps
 
 WORKDIR /myapp
 
-ADD package.json package-lock.json .npmrc other/patches/ ./
+COPY ./other/patches ./other/patches
+ADD package.json package-lock.json .npmrc ./
 RUN npm install --include=dev
 RUN npm run apply:patches
 
