@@ -11,9 +11,10 @@ import { MainLayoutProvider } from './main-layout-provider.tsx'
 type Props = {
 	content: React.ReactNode
 	aside?: React.ReactNode
+	footer?: React.ReactNode
 }
 
-function InnerMainLayout({ content, aside }: Props) {
+function InnerMainLayout({ content, aside, footer }: Props) {
 	const requestInfo = useRequestInfo()
 	const user = useOptionalUser()
 
@@ -41,7 +42,7 @@ function InnerMainLayout({ content, aside }: Props) {
 					</aside>
 				) : null}
 			</div>
-			<footer className="container"></footer>
+			<footer>{footer}</footer>
 		</div>
 	)
 }

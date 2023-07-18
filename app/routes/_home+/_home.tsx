@@ -9,6 +9,7 @@ import {
 	SidebarCategory,
 	SidebarItem,
 } from '~/components/layout/sidebar.tsx'
+import { Button } from '~/components/ui/button.tsx'
 import { prisma } from '~/utils/db.server.ts'
 import { getImgSrc } from '~/utils/misc.ts'
 
@@ -31,6 +32,21 @@ export default function Feed() {
 		<MainLayout
 			content={<Outlet />}
 			aside={<Aside categories={categories} />}
+			footer={
+				<div className="border-t">
+					<div className="container flex justify-center">
+						<Button variant="link" asChild>
+							<a
+								href="https://bereghici.dev"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								bereghici.dev
+							</a>
+						</Button>
+					</div>
+				</div>
+			}
 		/>
 	)
 }
