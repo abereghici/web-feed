@@ -66,6 +66,7 @@ async function seed() {
 			},
 			links: {
 				create: {
+					title: 'The New York Times',
 					url: 'https://www.nytimes.com/',
 					imageUrl:
 						'https://yt3.googleusercontent.com/ytc/AOPolaT6tAH_gUDkztSjfyMu4ekEt0XYoOYFe1D9RcDgEQ=s900-c-k-c0x00ffffff-no-rj',
