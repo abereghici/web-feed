@@ -76,11 +76,10 @@ async function upsertSource({
 	})
 }
 
-const enqueueFetchLinks =
-	sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(3)
+const enqueue = sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(3)
 
 async function upsertLinks(source: Source) {
-	const links = await enqueueFetchLinks(() => getFreshLinks(source))
+	const links = await enqueue(() => getFreshLinks(source))
 
 	for (const link of links) {
 		if (!link.link || !link.title) continue
@@ -101,10 +100,6 @@ async function upsertLinks(source: Source) {
 		})
 	}
 }
-
-const enqueueUpsertSource =
-	sizedPool<Awaited<ReturnType<typeof upsertSource>>>(3)
-const enqueueUpsertLinks = sizedPool<Awaited<ReturnType<typeof upsertLinks>>>(3)
 
 export async function action({ request }: DataFunctionArgs) {
 	const token = process.env.INTERNAL_COMMAND_TOKEN
@@ -140,13 +135,11 @@ export async function action({ request }: DataFunctionArgs) {
 
 	parsedData.data.forEach(async data => {
 		const category = await upsertCategory(data.category)
-		data.items.forEach(item =>
-			enqueueUpsertSource(async () => {
-				const source = await upsertSource({ name: item.name, item, category })
-				await enqueueUpsertLinks(() => upsertLinks(source))
-				return source
-			}),
-		)
+		data.items.forEach(async item => {
+			const source = await upsertSource({ name: item.name, item, category })
+			await upsertLinks(source)
+			return source
+		})
 	})
 	return json({ message: 'ok' })
 }
