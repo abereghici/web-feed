@@ -3,6 +3,7 @@ import RSSParser from 'rss-parser'
 import metadataParser, { type Result } from 'url-metadata'
 import { isFulfilled } from './misc.ts'
 import { sizedPool } from 'promisified-resource-pool'
+import axios from 'axios'
 
 export const config = {
 	// Time To Live (ttl) in milliseconds: the cached value is considered valid for 24 hours
@@ -13,13 +14,14 @@ export const config = {
 }
 
 export async function fetchSource(url: string) {
-	const xml = await fetch(url, {
-		headers: {
-			connection: 'keep-alive',
-		},
-	}).then(res => res.text())
+	// const xml = await fetch(url, {
+	// 	headers: {
+	// 		connection: 'keep-alive',
+	// 	},
+	// }).then(res => res.text())
 
-	return new RSSParser().parseString(xml)
+	const xml = await axios.get(url)
+	return new RSSParser().parseString(xml.data)
 }
 
 export async function fetchMetadata(url: string) {
