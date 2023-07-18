@@ -1,0 +1,20 @@
+diff --git a/node_modules/@remix-run/web-fetch/dist/lib.node.cjs b/node_modules/@remix-run/web-fetch/dist/lib.node.cjs
+index 68ee1e2..38723e6 100644
+--- a/node_modules/@remix-run/web-fetch/dist/lib.node.cjs
++++ b/node_modules/@remix-run/web-fetch/dist/lib.node.cjs
+@@ -2030,10 +2030,13 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
+ 		socket.prependListener('close', onSocketClose);
+ 		socket.on('data', onData);
+ 
+-		request.on('close', () => {
++		const removeSocketListeners = () => {
+ 			socket.removeListener('close', onSocketClose);
+ 			socket.removeListener('data', onData);
+-		});
++		}
++
++		request.on('close', removeSocketListeners);
++		request.on('abort', removeSocketListeners);
+ 	});
+ }
+ 
