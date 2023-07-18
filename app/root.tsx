@@ -153,15 +153,6 @@ function Document({
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<Links />
-			</head>
-			<body className="bg-background text-foreground">
-				{children}
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
-					}}
-				/>
 				{process.env.NODE_ENV === 'development' ||
 				!env.GA_TRACKING_ID ? null : (
 					<>
@@ -188,6 +179,16 @@ function Document({
 						/>
 					</>
 				)}
+			</head>
+			<body className="bg-background text-foreground">
+				{children}
+				<script
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: `window.ENV = ${JSON.stringify(env)}`,
+					}}
+				/>
+
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 				<LiveReload nonce={nonce} />
