@@ -16,6 +16,7 @@ WORKDIR /myapp
 
 ADD package.json package-lock.json .npmrc ./
 RUN npm install --include=dev
+RUN npm run apply-patches
 
 # Setup production node_modules
 FROM base as production-deps

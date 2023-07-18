@@ -18,7 +18,7 @@ node_modules
 
 /other/cache.db
 
-!/patches/*
+!/other/patches/*
 
 # Easy way to create temporary files/folders that won't accidentally be added to git
 *.local.*
