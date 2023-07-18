@@ -14,10 +14,8 @@ FROM base as deps
 
 WORKDIR /myapp
 
-COPY /other/patches /other/patches
 ADD package.json package-lock.json .npmrc ./
 RUN npm install --include=dev
-RUN npm run apply:patches
 
 # Setup production node_modules
 FROM base as production-deps
@@ -39,6 +37,7 @@ ADD prisma .
 RUN npx prisma generate
 
 ADD . .
+RUN npm run apply:patches
 RUN npm run build
 
 # Finally, build the production image with minimal footprint
