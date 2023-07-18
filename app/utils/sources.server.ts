@@ -72,7 +72,7 @@ const enqueue = sizedPool<{
 	link: string | undefined
 	image: string | undefined
 	sourceImageId: string
-} | null>(5)
+} | null>(3)
 
 export async function getFreshLinks(source: Source) {
 	console.log('Fetching ', source.url)

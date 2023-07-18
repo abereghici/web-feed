@@ -76,7 +76,7 @@ async function upsertSource({
 	})
 }
 
-const enqueue = sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(3)
+const enqueue = sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(1)
 
 async function upsertLinks(source: Source) {
 	const links = await enqueue(() => getFreshLinks(source))
@@ -135,11 +135,12 @@ export async function action({ request }: DataFunctionArgs) {
 
 	parsedData.data.forEach(async data => {
 		const category = await upsertCategory(data.category)
-		data.items.forEach(async item => {
+
+		for (const item of data.items) {
 			const source = await upsertSource({ name: item.name, item, category })
+
 			await upsertLinks(source)
-			return source
-		})
+		}
 	})
 	return json({ message: 'ok' })
 }
