@@ -2,30 +2,27 @@ import { json, type DataFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { prisma } from '~/utils/db.server.ts'
 import { requireAdmin } from '~/utils/permissions.server.ts'
-import { SourceEditor } from '../resources+/source-editor.tsx'
+import { CategoryEditor } from '~/routes/resources+/category-editor.tsx'
 
 export async function loader({ params, request }: DataFunctionArgs) {
 	await requireAdmin(request)
-	const source = await prisma.source.findFirst({
+	const category = await prisma.category.findFirst({
 		where: {
-			id: params.sourceId,
+			id: params.categoryId,
 		},
 	})
-	if (!source) {
+	if (!category) {
 		throw new Response('Not found', { status: 404 })
 	}
-	return json({ source })
+	return json({ category })
 }
 
-export default function EditSource() {
+export default function EditCategory() {
 	const data = useLoaderData<typeof loader>()
 
 	return (
 		<main className="container my-4">
-			<SourceEditor
-				source={data.source}
-				categoryId={data.source.sourceCategoryId!}
-			/>
+			<CategoryEditor category={data.category} />
 		</main>
 	)
 }

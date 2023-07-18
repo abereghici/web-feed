@@ -160,7 +160,8 @@ export default function CacheAdminRoute() {
 			</Form>
 
 			<div className="flex flex-col gap-4">
-				<h2 className="text-h5">LRU Cache:</h2>
+				<h2 className="text-h5">LRU Cache: ({data.cacheKeys.lru.length})</h2>
+
 				{data.cacheKeys.lru.map(key => (
 					<CacheKeyRow
 						key={key}
@@ -172,7 +173,9 @@ export default function CacheAdminRoute() {
 			</div>
 			<Spacer size="4xs" />
 			<div className="flex flex-col gap-4">
-				<h2 className="text-h5">SQLite Cache:</h2>
+				<h2 className="text-h5">
+					SQLite Cache: ({data.cacheKeys.sqlite.length})
+				</h2>
 				{data.cacheKeys.sqlite.map(key => (
 					<CacheKeyRow
 						key={key}

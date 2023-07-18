@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { prisma } from '~/utils/db.server.ts'
 import { deleteAllData } from 'tests/setup/utils.ts'
 import { getPasswordHash } from '~/utils/auth.server.ts'
@@ -42,7 +43,7 @@ async function seed() {
 	)
 
 	console.time(`Creating categories...`)
-	const category = await prisma.sourceCategory.create({
+	const category = await prisma.category.create({
 		data: { name: 'News' },
 	})
 	console.timeEnd(`Creating categories...`)
@@ -53,6 +54,23 @@ async function seed() {
 			name: 'The New York Times',
 			slug: 'the-new-york-times',
 			url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml',
+			image: {
+				create: {
+					contentType: 'image/png',
+					file: {
+						create: {
+							blob: await fs.promises.readFile('./tests/fixtures/user.png'),
+						},
+					},
+				},
+			},
+			links: {
+				create: {
+					url: 'https://www.nytimes.com/',
+					imageUrl:
+						'https://yt3.googleusercontent.com/ytc/AOPolaT6tAH_gUDkztSjfyMu4ekEt0XYoOYFe1D9RcDgEQ=s900-c-k-c0x00ffffff-no-rj',
+				},
+			},
 			category: {
 				connect: {
 					id: category.id,

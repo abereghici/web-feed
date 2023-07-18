@@ -31,19 +31,33 @@ import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { useForm } from '@conform-to/react'
 import { StatusButton } from '~/components/ui/status-button.tsx'
 import { ErrorList } from '~/components/forms.tsx'
+import { Avatar, AvatarImage } from '@radix-ui/react-avatar'
+import { getImgSrc } from '~/utils/misc.ts'
 
-const DeleteCategorySchema = z.object({
-	intent: z.literal('delete-category'),
-	categoryId: z.string(),
+const DeleteSourceSchema = z.object({
+	intent: z.literal('delete-source'),
+	sourceId: z.string(),
 })
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request, params }: DataFunctionArgs) {
 	await requireAdmin(request)
 
-	const categories = await prisma.sourceCategory.findMany()
+	const category = await prisma.category.findFirst({
+		where: {
+			id: params.categoryId,
+		},
+		select: {
+			id: true,
+			name: true,
+			sources: true,
+		},
+	})
+	if (!category) {
+		throw new Response('Not found', { status: 404 })
+	}
 
 	return json({
-		categories,
+		category,
 	})
 }
 
@@ -52,7 +66,7 @@ export async function action({ request }: DataFunctionArgs) {
 	const formData = await request.formData()
 
 	const submission = parse(formData, {
-		schema: DeleteCategorySchema,
+		schema: DeleteSourceSchema,
 		acceptMultipleErrors: () => true,
 	})
 	if (!submission.value || submission.intent !== 'submit') {
@@ -65,67 +79,83 @@ export async function action({ request }: DataFunctionArgs) {
 		)
 	}
 
-	const { categoryId } = submission.value
+	const { sourceId } = submission.value
 
-	const category = await prisma.sourceCategory.findFirst({
-		select: { id: true },
+	const source = await prisma.source.findFirst({
+		select: {
+			id: true,
+			categoryId: true,
+			image: {
+				select: {
+					fileId: true,
+				},
+			},
+		},
 		where: {
-			id: categoryId,
+			id: sourceId,
 		},
 	})
-	if (!category) {
-		submission.error.categoryId = ['Category not found']
+
+	if (!source) {
+		submission.error.sourceId = ['Source not found']
 		return json({ status: 'error', submission } as const, {
 			status: 404,
 		})
 	}
 
-	await prisma.sourceCategory.delete({
-		where: { id: category.id },
-	})
+	await prisma.$transaction([
+		prisma.source.delete({
+			where: { id: source.id },
+		}),
+		prisma.file.delete({
+			where: { id: source.image.fileId },
+		}),
+	])
 
-	return redirectWithToast(`/admin/category`, {
-		title: 'Category deleted',
+	return redirectWithToast(`/admin/category/${source.categoryId}/source`, {
+		title: 'Source deleted',
 		variant: 'destructive',
 	})
 }
 
-export default function CategoriesList() {
-	const { categories } = useLoaderData<typeof loader>()
+export default function SourcesList() {
+	const { category } = useLoaderData<typeof loader>()
 	return (
 		<main className="container my-4">
 			<div>
-				<h2 className="text-2xl font-bold tracking-tight">Manage Categories</h2>
+				<h2 className="text-2xl font-bold tracking-tight">Manage Sources</h2>
 				<p className="text-muted-foreground">
-					{categories.length}{' '}
-					{categories.length === 1 ? 'category' : 'categories'}
+					{category.name} - {category.sources.length}{' '}
+					{category.sources.length === 1 ? 'source' : 'sources'}
 				</p>
 			</div>
 			<div className="flex justify-start py-4">
 				<Button asChild variant="secondary">
-					<Link to="/admin/category/new">
+					<Link to={`/admin/category/${category.id}/source/new`}>
 						<Icon name="plus" className="mr-2 scale-125" />
-						<span>New Category</span>
+						<span>New Source</span>
 					</Link>
 				</Button>
 			</div>
-
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Category</TableHead>
+							<TableHead>Source</TableHead>
 							<TableHead className="text-right">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{categories.length ? (
-							categories.map(category => (
-								<TableRow key={category.id}>
-									<TableCell className="font-bold">
-										<Link to={`/admin/category/${category.id}/source`}>
-											{category.name}
-										</Link>
+						{category.sources.length ? (
+							category.sources.map(source => (
+								<TableRow key={source.id}>
+									<TableCell>
+										<div className="flex items-center font-bold">
+											<Avatar className="mr-2 h-6 w-6">
+												<AvatarImage src={getImgSrc(source.imageId)} alt="" />
+											</Avatar>
+											{source.name}
+										</div>
 									</TableCell>
 									<TableCell align="right">
 										<DropdownMenu>
@@ -140,10 +170,13 @@ export default function CategoriesList() {
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end" className="w-[160px]">
 												<DropdownMenuItem asChild>
-													<EditCategory id={category.id} />
+													<EditSource
+														categoryId={category.id}
+														sourceId={source.id}
+													/>
 												</DropdownMenuItem>
 												<DropdownMenuItem asChild>
-													<DeleteCategory id={category.id} />
+													<DeleteSource id={source.id} />
 												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
@@ -153,7 +186,7 @@ export default function CategoriesList() {
 						) : (
 							<TableRow>
 								<TableCell colSpan={2} className="text-center">
-									No categories yet.
+									No sources yet.
 								</TableCell>
 							</TableRow>
 						)}
@@ -164,10 +197,16 @@ export default function CategoriesList() {
 	)
 }
 
-export function EditCategory({ id }: { id: string }) {
+export function EditSource({
+	categoryId,
+	sourceId,
+}: {
+	categoryId: string
+	sourceId: string
+}) {
 	return (
 		<Button asChild variant="ghost" className="w-full justify-start">
-			<Link to={`/admin/category/${id}/edit`}>
+			<Link to={`/admin/category/${categoryId}/source/${sourceId}/edit`}>
 				<Icon name="pencil-1" className="mr-2 scale-125" />
 				<span>Edit</span>
 			</Link>
@@ -175,31 +214,31 @@ export function EditCategory({ id }: { id: string }) {
 	)
 }
 
-export function DeleteCategory({ id }: { id: string }) {
+export function DeleteSource({ id }: { id: string }) {
 	const actionData = useActionData<typeof action>()
 	const navigation = useNavigation()
 	const formAction = useFormAction()
 	const [form] = useForm({
-		id: 'delete-category',
+		id: 'delete-source',
 		lastSubmission: actionData?.submission,
-		constraint: getFieldsetConstraint(DeleteCategorySchema),
+		constraint: getFieldsetConstraint(DeleteSourceSchema),
 		onValidate({ formData }) {
-			return parse(formData, { schema: DeleteCategorySchema })
+			return parse(formData, { schema: DeleteSourceSchema })
 		},
 	})
 
 	return (
 		<Form method="post" {...form.props}>
-			<input type="hidden" name="categoryId" value={id} />
+			<input type="hidden" name="sourceId" value={id} />
 			<StatusButton
 				type="submit"
 				name="intent"
-				value="delete-category"
+				value="delete-source"
 				variant="ghost"
 				status={
 					navigation.state === 'submitting' &&
 					navigation.formAction === formAction &&
-					navigation.formData?.get('intent') === 'delete-category' &&
+					navigation.formData?.get('intent') === 'delete-source' &&
 					navigation.formMethod === 'POST'
 						? 'pending'
 						: actionData?.status ?? 'idle'

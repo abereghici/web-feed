@@ -3,45 +3,26 @@ import { Header } from './header.tsx'
 import { Nav } from './nav.tsx'
 import { UserMenu } from './user-menu.tsx'
 import { ThemeSwitch } from '~/routes/resources+/theme/index.tsx'
-import { Icon } from '../ui/icon.tsx'
-import { Sheet, SheetTrigger, SheetContent } from '../ui/sheet.tsx'
 import { useRequestInfo } from '~/utils/request-info.ts'
-import { Button } from '../ui/button.tsx'
 import { ScrollArea } from '../ui/scroll-area.tsx'
+import { MobileSidebar } from './mobile-sidebar.tsx'
+import { MainLayoutProvider } from './main-layout-provider.tsx'
 
 type Props = {
 	content: React.ReactNode
 	aside?: React.ReactNode
 }
 
-export function MainLayout({ content, aside }: Props) {
+function InnerMainLayout({ content, aside }: Props) {
 	const requestInfo = useRequestInfo()
 	const user = useOptionalUser()
 
 	return (
-		<div className="flex h-screen min-h-screen flex-col">
+		<div className="min-h-screen-available flex h-screen flex-col">
 			<Header>
 				<Nav
 					className="container"
-					leftSlot={
-						aside ? (
-							<Sheet>
-								<SheetTrigger asChild>
-									<Button variant="ghost" className="sm:hidden">
-										<Icon name="hamburger">
-											<span className="sr-only">Toggle menu</span>
-										</Icon>
-									</Button>
-								</SheetTrigger>
-								<SheetContent
-									className="w-[280px] p-0 sm:w-[540px]"
-									side="left"
-								>
-									{aside}
-								</SheetContent>
-							</Sheet>
-						) : null
-					}
+					leftSlot={aside ? <MobileSidebar>{aside}</MobileSidebar> : null}
 					rightSlot={
 						<div className="flex items-center gap-4">
 							{user ? <UserMenu /> : null}
@@ -62,5 +43,13 @@ export function MainLayout({ content, aside }: Props) {
 			</div>
 			<footer className="container"></footer>
 		</div>
+	)
+}
+
+export function MainLayout(props: Props) {
+	return (
+		<MainLayoutProvider>
+			<InnerMainLayout {...props} />
+		</MainLayoutProvider>
 	)
 }

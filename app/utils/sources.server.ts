@@ -2,6 +2,7 @@ import { type Source } from '@prisma/client'
 import RSSParser from 'rss-parser'
 import metadataParser, { type Result } from 'url-metadata'
 import { isFulfilled } from './misc.ts'
+import { sizedPool } from 'promisified-resource-pool'
 
 export const config = {
 	// Time To Live (ttl) in milliseconds: the cached value is considered valid for 24 hours
@@ -64,27 +65,50 @@ export function extractImageFromMetadata(metadata: Result) {
 	return imageLink
 }
 
+const enqueue = sizedPool<{
+	title: string | undefined
+	link: string | undefined
+	image: string | undefined
+	sourceImageId: string
+} | null>(5)
+
 export async function getFreshLinks(source: Source) {
-	const result = await fetchSource(source.url)
+	console.log('Fetching ', source.url)
+
+	const data = await fetchSource(source.url).catch(err => {
+		console.error(err)
+		return null
+	})
+
+	if (!data) return []
 
 	const links = await Promise.allSettled(
-		result.items.map(async item => {
-			let link = item.link
-			if (link?.startsWith('/')) {
-				link = new URL(link, source.url).toString()
-			}
-
-			if (link) {
-				const meta = await fetchMetadata(link)
-				return {
-					title: item.title,
-					link: item.link,
-					image: meta ? extractImageFromMetadata(meta) : undefined,
-					sourceImageId: source.imageId,
+		data.items.map(async item => {
+			return enqueue(async () => {
+				let link = item.link
+				if (link?.startsWith('/')) {
+					link = new URL(link, source.url).toString()
 				}
-			}
 
-			return null
+				if (link) {
+					const meta = await fetchMetadata(link).catch(err => {
+						console.error(link, err)
+						return null
+					})
+
+					// If we can't fetch metadata, we don't want to show the link, might be 404
+					if (!meta) return null
+
+					return {
+						title: item.title,
+						link: item.link,
+						image: meta ? extractImageFromMetadata(meta) : undefined,
+						sourceImageId: source.imageId,
+					}
+				}
+
+				return null
+			})
 		}),
 	)
 

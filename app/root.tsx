@@ -88,7 +88,7 @@ export async function loader({ request }: DataFunctionArgs) {
 				() =>
 					prisma.user.findUnique({
 						where: { id: userId },
-						select: { id: true, name: true, username: true, imageId: true },
+						select: { id: true, name: true, username: true },
 					}),
 				{ timings, type: 'find user', desc: 'find user in root' },
 		  )

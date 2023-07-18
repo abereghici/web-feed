@@ -12,7 +12,7 @@ import { Avatar, AvatarImage } from '../ui/avatar.tsx'
 
 type Props = {
 	title: string
-	image?: string
+	image?: string | null
 	href: string
 	sourceImage?: string
 }

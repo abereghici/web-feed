@@ -11,7 +11,7 @@ import { requireAdmin } from '~/utils/permissions.server.ts'
 
 export async function loader({ request }: DataFunctionArgs) {
 	await requireAdmin(request)
-	const categoriesCount = await prisma.sourceCategory.count()
+	const categoriesCount = await prisma.category.count()
 	const sourcesCount = await prisma.source.count()
 
 	return json({

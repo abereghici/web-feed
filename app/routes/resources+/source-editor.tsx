@@ -11,6 +11,7 @@ import { ErrorList, Field } from '~/components/forms.tsx'
 import { redirectWithToast } from '~/utils/flash-session.server.ts'
 import { requireAdmin } from '~/utils/permissions.server.ts'
 import { getFavicon, slugify } from '~/utils/misc.ts'
+import { getFreshLinks } from '~/utils/sources.server.ts'
 
 export const SourceEditorSchema = z.object({
 	id: z.string().optional(),
@@ -68,22 +69,20 @@ export async function action({ request }: DataFunctionArgs) {
 		})
 	} else {
 		const { buffer, contentType } = await getFavicon(new URL(url).origin)
-		const image = {
-			contentType,
-			file: {
-				create: {
-					blob: buffer,
-				},
-			},
-		}
-
-		await prisma.source.create({
+		const createdSource = await prisma.source.create({
 			data: {
 				name,
 				slug: slugify(name),
 				url,
 				image: {
-					create: image,
+					create: {
+						contentType,
+						file: {
+							create: {
+								blob: buffer,
+							},
+						},
+					},
 				},
 				category: {
 					connect: {
@@ -92,6 +91,32 @@ export async function action({ request }: DataFunctionArgs) {
 				},
 			},
 		})
+
+		const links = await getFreshLinks(createdSource)
+
+		await Promise.allSettled(
+			links
+				.map(link => {
+					if (!link.link || !link.title) return null
+					return prisma.link.upsert({
+						where: {
+							url: link.link,
+						},
+						create: {
+							title: link.title,
+							url: link.link,
+							imageUrl: link.image,
+							source: {
+								connect: {
+									id: createdSource.id,
+								},
+							},
+						},
+						update: {},
+					})
+				})
+				.filter(Boolean),
+		)
 	}
 	return redirectWithToast(
 		`/admin/category/${submission.value.categoryId}/source`,

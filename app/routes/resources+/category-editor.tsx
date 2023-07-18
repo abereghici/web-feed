@@ -48,7 +48,7 @@ export async function action({ request }: DataFunctionArgs) {
 	}
 
 	if (id) {
-		const existingCategory = await prisma.sourceCategory.findFirst({
+		const existingCategory = await prisma.category.findFirst({
 			where: { id },
 			select: { id: true },
 		})
@@ -61,13 +61,13 @@ export async function action({ request }: DataFunctionArgs) {
 				{ status: 404 },
 			)
 		}
-		await prisma.sourceCategory.update({
+		await prisma.category.update({
 			where: { id },
 			data,
 			select,
 		})
 	} else {
-		await prisma.sourceCategory.create({ data, select })
+		await prisma.category.create({ data, select })
 	}
 	return redirectWithToast(`/admin/category`, {
 		title: id ? 'Category updated' : 'Category created',
