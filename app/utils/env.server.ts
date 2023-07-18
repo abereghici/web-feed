@@ -39,6 +39,7 @@ export function getEnv() {
 	return {
 		MODE: process.env.NODE_ENV,
 		SENTRY_DSN: process.env.SENTRY_DSN,
+		GA_TRACKING_ID: process.env.GA_TRACKING_ID,
 	}
 }
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { cssBundleHref } from '@remix-run/css-bundle'
 import {
 	json,
@@ -14,6 +15,7 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
+	useLocation,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
 import { GeneralErrorBoundary } from '~/components/error-boundary.tsx'
@@ -36,6 +38,7 @@ import { useToast } from '~/utils/useToast.tsx'
 import nProgressStyles from 'nprogress/nprogress.css'
 import { GlobalLoading } from './components/global-loading.tsx'
 import { getSocialMetas } from './utils/seo.ts'
+import * as gtag from '~/utils/gtags.client.ts'
 
 export const links: LinksFunction = () => {
 	return [
@@ -159,6 +162,32 @@ function Document({
 						__html: `window.ENV = ${JSON.stringify(env)}`,
 					}}
 				/>
+				{process.env.NODE_ENV === 'development' ||
+				!env.GA_TRACKING_ID ? null : (
+					<>
+						<script
+							nonce={nonce}
+							async
+							src={`https://www.googletagmanager.com/gtag/js?id=${env.GA_TRACKING_ID}`}
+						/>
+						<script
+							nonce={nonce}
+							async
+							id="gtag-init"
+							dangerouslySetInnerHTML={{
+								__html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', '${env.GA_TRACKING_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `,
+							}}
+						/>
+					</>
+				)}
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 				<LiveReload nonce={nonce} />
@@ -172,6 +201,14 @@ function App() {
 	const nonce = useNonce()
 	const theme = useTheme()
 	useToast(data.flash?.toast)
+
+	const location = useLocation()
+
+	useEffect(() => {
+		if (data.ENV.GA_TRACKING_ID) {
+			gtag.pageview(location.pathname, data.ENV.GA_TRACKING_ID)
+		}
+	}, [location, data.ENV.GA_TRACKING_ID])
 
 	return (
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
