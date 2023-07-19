@@ -3,14 +3,13 @@ import { updateSources } from '~/utils/sources.server.ts'
 
 export function init() {
 	cron.schedule(
-		'0 22 * * *',
+		'0 5 * * *',
 		async () => {
 			console.log(`${new Date().toISOString()}: Scheduled update sources cron`)
 			await updateSources()
 		},
 		{
 			name: 'update-sources',
-			runOnInit: true,
 			timezone: 'Europe/Bucharest',
 		},
 	)
