@@ -62,7 +62,7 @@ export function Icon({
 	)
 }
 
-type IconName =
+export type IconName =
   | "arrow-left"
   | "arrow-right"
   | "avatar"
