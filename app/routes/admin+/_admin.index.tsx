@@ -13,10 +13,12 @@ export async function loader({ request }: DataFunctionArgs) {
 	await requireAdmin(request)
 	const categoriesCount = await prisma.category.count()
 	const sourcesCount = await prisma.source.count()
+	const linksCount = await prisma.link.count()
 
 	return json({
 		categoriesCount,
 		sourcesCount,
+		linksCount,
 	})
 }
 
@@ -39,6 +41,14 @@ export default function AdminIndex() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{data.sourcesCount}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+						<CardTitle className="text-sm font-medium">Links</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{data.linksCount}</div>
 					</CardContent>
 				</Card>
 			</div>

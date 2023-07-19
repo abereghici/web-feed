@@ -52,7 +52,7 @@ export function UserMenu() {
 						}}
 					>
 						<Link to="/admin">
-							<Button variant="ghost" className="m-0 justify-start p-0">
+							<Button variant="ghost" className="m-0 w-full justify-start p-0">
 								<Icon className="mr-2" name="rocket" />
 								Manage
 							</Button>
