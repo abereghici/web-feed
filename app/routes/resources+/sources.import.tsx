@@ -79,7 +79,7 @@ async function upsertSource({
 const enqueue = sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(1)
 
 async function upsertLinks(source: Source) {
-	const links = await enqueue(() => getFreshLinks(source))
+	const links = await enqueue(() => getFreshLinks(source.url))
 
 	for (const link of links) {
 		if (!link.link || !link.title) continue

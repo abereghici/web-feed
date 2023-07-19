@@ -92,7 +92,7 @@ export async function action({ request }: DataFunctionArgs) {
 			},
 		})
 
-		const links = await getFreshLinks(createdSource)
+		const links = await getFreshLinks(createdSource.url)
 
 		await Promise.allSettled(
 			links

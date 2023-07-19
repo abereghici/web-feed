@@ -1,8 +1,8 @@
-import { type Source } from '@prisma/client'
 import RSSParser from 'rss-parser'
 import metadataParser, { type Result } from 'url-metadata'
-import { isFulfilled } from './misc.ts'
 import { sizedPool } from 'promisified-resource-pool'
+import { prisma } from '~/utils/db.server.ts'
+import { isFulfilled } from '~/utils/misc.ts'
 
 export const config = {
 	// Time To Live (ttl) in milliseconds: the cached value is considered valid for 24 hours
@@ -69,13 +69,12 @@ const enqueue = sizedPool<{
 	title: string | undefined
 	link: string | undefined
 	image: string | undefined
-	sourceImageId: string
 } | null>(3)
 
-export async function getFreshLinks(source: Source) {
-	console.log('Fetching ', source.url)
+export async function getFreshLinks(sourceUrl: string) {
+	console.log('Fetching ', sourceUrl)
 
-	const data = await fetchSource(source.url).catch(err => {
+	const data = await fetchSource(sourceUrl).catch(err => {
 		console.error(err)
 		return null
 	})
@@ -87,7 +86,7 @@ export async function getFreshLinks(source: Source) {
 			return enqueue(async () => {
 				let link = item.link
 				if (link?.startsWith('/')) {
-					link = new URL(link, source.url).toString()
+					link = new URL(link, sourceUrl).toString()
 				}
 
 				if (link) {
@@ -103,7 +102,6 @@ export async function getFreshLinks(source: Source) {
 						title: item.title,
 						link: item.link,
 						image: meta ? extractImageFromMetadata(meta) : undefined,
-						sourceImageId: source.imageId,
 					}
 				}
 
@@ -116,4 +114,38 @@ export async function getFreshLinks(source: Source) {
 		.filter(isFulfilled)
 		.map(link => link.value)
 		.filter(Boolean)
+}
+
+const enqueueLinks = sizedPool<Awaited<ReturnType<typeof getFreshLinks>>>(3)
+
+export const updateSources = async () => {
+	const sources = await prisma.source.findMany({
+		select: {
+			id: true,
+			url: true,
+		},
+	})
+
+	sources.forEach(async source => {
+		const links = await enqueueLinks(() => getFreshLinks(source.url))
+
+		for (const link of links) {
+			if (!link.link || !link.title) continue
+
+			await prisma.link.upsert({
+				where: { url: link.link },
+				create: {
+					title: link.title,
+					url: link.link,
+					imageUrl: link.image,
+					source: {
+						connect: {
+							id: source.id,
+						},
+					},
+				},
+				update: {},
+			})
+		}
+	})
 }
