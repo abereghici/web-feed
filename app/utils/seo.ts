@@ -1,9 +1,9 @@
 export function getSocialMetas({
 	url,
 	title = 'Web Feed',
-	description = 'A useful database with links and resources for web developers',
+	description = 'A curated list of blogs and resources for web developers, delivered through RSS, to effortlessly stay up to date with the latest trends, insights, and best practices.',
 	image = 'https://web-feed.dev/img/og.jpeg',
-	keywords = '',
+	keywords = 'javascript,typescript,css,html,web,frontend,developer,react,vue,angular,node,deno,webdev,webdevelopment,rss,feed,news,resources',
 }: {
 	image?: string
 	url: string

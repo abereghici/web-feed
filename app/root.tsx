@@ -73,8 +73,6 @@ export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
 	return getSocialMetas({
 		title: data ? 'Web Feed' : 'Error | Web Feed',
 		url: getUrl(requestInfo),
-		keywords:
-			'javascript,typescript,css,html,web,frontend,developer,react,vue,angular,node,deno,webdev,webdevelopment',
 	})
 }
 
