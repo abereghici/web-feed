@@ -12,14 +12,20 @@ export async function loader({ params }: DataFunctionArgs) {
 		source = await prisma.source.findUnique({
 			where: { slug: sourceName },
 			include: {
-				links: true,
+				links: {
+					orderBy: { createdAt: 'desc' },
+				},
 			},
 		})
 	} else {
 		const firstCategory = await prisma.category.findFirst({
 			include: {
 				sources: {
-					include: { links: true },
+					include: {
+						links: {
+							orderBy: { createdAt: 'desc' },
+						},
+					},
 				},
 			},
 		})

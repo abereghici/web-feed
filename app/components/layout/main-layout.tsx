@@ -33,15 +33,12 @@ function InnerMainLayout({ content, aside, footer }: Props) {
 				/>
 			</Header>
 			<div className="container flex flex-1 flex-row overflow-y-hidden">
-			{aside ? (
-					<aside className="hidden w-64 border-r sm:block">
-						{aside}
-					</aside>
+				{aside ? (
+					<aside className="hidden w-64 border-r sm:block">{aside}</aside>
 				) : null}
 				<main className="flex-1">
 					<ScrollArea className="h-full scroll-py-4">{content}</ScrollArea>
 				</main>
-				
 			</div>
 			<footer>{footer}</footer>
 		</div>
