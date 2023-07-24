@@ -69,6 +69,7 @@ const enqueue = sizedPool<{
 	title: string | undefined
 	link: string | undefined
 	image: string | undefined
+	createdDate: Date | undefined
 } | null>(3)
 
 export async function getFreshLinks(sourceUrl: string) {
@@ -102,6 +103,7 @@ export async function getFreshLinks(sourceUrl: string) {
 						title: item.title,
 						link: item.link,
 						image: meta ? extractImageFromMetadata(meta) : undefined,
+						createdDate: item.pubDate ? new Date(item.pubDate) : undefined,
 					}
 				}
 
@@ -138,13 +140,16 @@ export const updateSources = async () => {
 					title: link.title,
 					url: link.link,
 					imageUrl: link.image,
+					createdAt: link.createdDate ? link.createdDate : undefined,
 					source: {
 						connect: {
 							id: source.id,
 						},
 					},
 				},
-				update: {},
+				update: link.createdDate ? {
+					createdAt: link.createdDate
+				}: {},
 			})
 		}
 	})

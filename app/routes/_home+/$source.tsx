@@ -57,6 +57,7 @@ export default function SourceLinks() {
 					title={link.title ?? 'No title'}
 					href={link.url ?? '#'}
 					image={link.imageUrl}
+					date={link.createdAt}
 					sourceImage={getImgSrc(data.sourceImageId)}
 				/>
 			))}

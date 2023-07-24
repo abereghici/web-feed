@@ -62,15 +62,14 @@ function Aside({ categories }: { categories: Categories }) {
 
 	return (
 		<Sidebar>
-			{categories.map((category, categoryIndex) => (
+			{categories.map(category => (
 				<SidebarCategory key={category.id} title={category.name}>
-					{category.sources.map((source, sourceIndex) => (
+					{category.sources.map(source => (
 						<SidebarItem
 							key={source.id}
 							title={source.name}
 							thumbnail={getImgSrc(source.imageId)}
 							href={`/${source.slug}`}
-							isFirstItem={categoryIndex === 0 && sourceIndex === 0}
 							onClick={onClick}
 						/>
 					))}

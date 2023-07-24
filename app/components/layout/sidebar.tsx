@@ -1,14 +1,13 @@
+import { NavLink } from '@remix-run/react'
 import { cn } from '~/utils/misc.ts'
 import { Button } from '../ui/button.tsx'
 import { ScrollArea } from '../ui/scroll-area.tsx'
-import { NavLink, useMatches } from '@remix-run/react'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.tsx'
 
 type SidebarItem = {
 	thumbnail?: string
 	title: string
 	href?: string
-	isFirstItem?: boolean
 	onClick?: () => void
 }
 
@@ -16,11 +15,8 @@ export function SidebarItem({
 	title,
 	thumbnail,
 	href,
-	isFirstItem,
 	onClick,
 }: SidebarItem) {
-	const matches = useMatches()
-	const { pathname } = matches[matches.length - 1]
 
 	const content = (
 		<>
@@ -40,7 +36,7 @@ export function SidebarItem({
 				{state => (
 					<Button
 						variant={
-							state.isActive || (pathname === '/' && isFirstItem)
+							state.isActive 
 								? 'secondary'
 								: 'ghost'
 						}
