@@ -9,7 +9,6 @@ import {
 	CardFooter,
 } from '../ui/card.tsx'
 import { Avatar, AvatarImage } from '../ui/avatar.tsx'
-import { ClientOnly } from 'remix-utils'
 
 type Props = {
 	title: string
