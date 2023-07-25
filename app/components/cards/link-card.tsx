@@ -9,6 +9,7 @@ import {
 	CardFooter,
 } from '../ui/card.tsx'
 import { Avatar, AvatarImage } from '../ui/avatar.tsx'
+import { ClientOnly } from 'remix-utils'
 
 type Props = {
 	title: string
@@ -35,7 +36,14 @@ export function LinkCard({ title, href, image, sourceImage, date }: Props) {
 					</a>
 				</CardTitle>
 				<CardDescription>
-					{date ? new Date(date).toLocaleDateString('en-us') : null}
+					{date
+						? new Date(date).toLocaleDateString('en-us', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+								timeZone: 'UTC',
+						  })
+						: null}
 				</CardDescription>
 			</CardHeader>
 			{image ? (
