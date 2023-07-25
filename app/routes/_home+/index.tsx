@@ -12,6 +12,11 @@ export async function loader() {
 					image: true,
 					links: {
 						orderBy: { createdAt: 'desc' },
+						where: {
+							createdAt: {
+								gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7), // 7 days
+							},
+						},
 						take: 5,
 					},
 				},
