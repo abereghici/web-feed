@@ -18,7 +18,7 @@ type Props = {
 	date?: string
 }
 
-export function LinkCard({ title, href, image, sourceImage,date }: Props) {
+export function LinkCard({ title, href, image, sourceImage, date }: Props) {
 	return (
 		<Card>
 			<CardHeader>
@@ -35,7 +35,7 @@ export function LinkCard({ title, href, image, sourceImage,date }: Props) {
 					</a>
 				</CardTitle>
 				<CardDescription>
-					{date ? new Date(date).toLocaleDateString() : null}
+					{date ? new Date(date).toLocaleDateString('en-us') : null}
 				</CardDescription>
 			</CardHeader>
 			{image ? (
